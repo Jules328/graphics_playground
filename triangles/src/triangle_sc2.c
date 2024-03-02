@@ -3,7 +3,7 @@
 
 #include "linmath.h"
 
-#include <glad/glad.h>
+#include <GLSC2/glsc2.h>
 #include <GLFW/glfw3.h>
 
 typedef struct Vertex {
@@ -61,9 +61,9 @@ int main(void)
         return -1;
     
     /* glfw window hints for opengl profile */
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "OpenGL Triangle", NULL, NULL);
@@ -81,14 +81,8 @@ int main(void)
     /* v-sync */
     glfwSwapInterval(1);
 
-    /* init GLAD */
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        glfwTerminate();
-        return -1;
-    }
-
-    // /* set clear color */
-    // glClearColor(0.5, 0.5, 0.5, 1.0);
+    /* set clear color */
+    glClearColor(0.5, 0.5, 0.5, 1.0);
 
     GLuint vertex_buffer;
     glGenBuffers(1, &vertex_buffer);
@@ -134,7 +128,7 @@ int main(void)
         mat4x4 m, p, mvp;
         mat4x4_identity(m);
         mat4x4_rotate_Z(m, m, (float) glfwGetTime());
-        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, -1.f, 1.f);
         mat4x4_mul(mvp, p, m);
  
         glUseProgram(program);

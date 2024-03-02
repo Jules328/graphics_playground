@@ -9,14 +9,15 @@ LDLIBS   := -lGL -lglfw -lm
 SDIR := src
 ODIR := obj
 
-EXE  := graphics
-SRC  := $(wildcard $(SDIR)/*.c)
-OBJ  := $(SRC:$(SDIR)/%.c=$(ODIR)/%.o)
+EXE  := triangle.exe triangle_sc1.exe triangle_sc2.exe
 
 .PHONY: all clean
 all: $(EXE)
 
-$(EXE): $(OBJ)
+triangle.exe: $(ODIR)/triangle.o $(ODIR)/glad.o
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+%.exe: $(ODIR)/%.o
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(ODIR)/%.o: $(SDIR)/%.c | $(ODIR)
