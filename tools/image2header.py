@@ -1,0 +1,91 @@
+#! /usr/bin/python3
+
+import argparse
+import sys
+import os
+from PIL import Image
+
+def get_pixel_string(image: Image) -> str:
+    pixels = image.load()
+    mode = image.load()
+    (w,h) = image.size
+
+    pixel_str = ""
+    for j in range(h):
+        pixel_str += "\t{ "
+        for i in range(w):
+            pixel = pixels[i,j]
+            if mode == "RGBA":
+                (r, g, b, a) = pixel
+                pixel_str += f"{{{r}u, {g}u, {b}u, {a}u}}"
+            elif mode == "RGB":
+                (r, g, b) = pixel
+                pixel_str += f"{{{r}u, {g}u, {b}u}}"
+            else:
+                pixel_str += f"{pixel}u"
+            
+            # add bracket at end of line
+            if i == w - 1:
+                pixel_str += " }"
+            # add comma between each pixel
+            if i != w - 1 or j != h - 1:
+                pixel_str += ", "
+        if j != h -1:
+            pixel_str += "\n"
+    
+    return pixel_str
+
+def get_header_string(name: str, image: Image) -> str:
+    (w,h) = image.size
+
+    parr = ""
+    bytes_per_pixel = 1
+    if image.mode == "RGBA":
+        parr = "[4]"
+        bytes_per_pixel = 4
+    elif image.mode == "RGB":
+        parr = "[3]"
+        bytes_per_pixel = 3
+
+    header_string  = "\n".join([
+    f"#ifndef _{name.upper()}_H_",
+    f"#define _{name.upper()}_H_",
+    "",
+    "#include <stdint.h>",
+    "",
+    f"uint16_t {name.lower()}_width = {w}u;",
+    f"uint16_t {name.lower()}_height = {h}u;",
+    f"uint32_t {name.lower()}_pixel_count = {w*h}u;",
+    f"uint32_t {name.lower()}_byte_count = {w*h*bytes_per_pixel}u;",
+    "",
+    f"uint8_t {name.lower()}_pixels[{w}][{h}]{parr} = {{",
+    get_pixel_string(image),
+    "};",
+    "",
+    f"#endif /* _{name.upper()}_H_ */"
+    ])
+
+    return header_string
+
+if __name__ == "__main__":
+    # parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('image', help="The image file to convert")
+    parser.add_argument('-n', '--name', help="The name of the output file")
+    parser.add_argument('-p', '--path', help="The path to the output directory of the header")
+    args = parser.parse_args()
+
+    # get the file's name if no name is provided
+    if args.name is None:
+        args.name = args.image.split('.')[0]
+    if args.path is None:
+        args.path = ""
+
+    # get pixel values
+    with Image.open(args.image) as im:
+        (w, h) = im.size
+        print(f'Opened "{args.image}": {im.format}, {w}x{h}, {im.mode}')
+        os.makedirs(args.path, exist_ok=True)
+        with open(f"{args.path}/{args.name}.h", 'w') as outfile:
+            print(f'Writing image header to "{args.path}/{args.name}.h"')
+            print(get_header_string(args.name, im), file=outfile)
