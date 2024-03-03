@@ -37,6 +37,8 @@ def get_pixel_string(image: Image) -> str:
 
 def get_header_string(name: str, image: Image) -> str:
     (w,h) = image.size
+    m_name = name.upper() # macro name
+    v_name = name.lower() # variable name
 
     parr = ""
     bytes_per_pixel = 1
@@ -48,21 +50,21 @@ def get_header_string(name: str, image: Image) -> str:
         bytes_per_pixel = 3
 
     header_string  = "\n".join([
-    f"#ifndef _{name.upper()}_H_",
-    f"#define _{name.upper()}_H_",
+    f"#ifndef _{m_name}_H_",
+    f"#define _{m_name}_H_",
     "",
     "#include <stdint.h>",
     "",
-    f"uint16_t {name.lower()}_width = {w}u;",
-    f"uint16_t {name.lower()}_height = {h}u;",
-    f"uint32_t {name.lower()}_pixel_count = {w*h}u;",
-    f"uint32_t {name.lower()}_byte_count = {w*h*bytes_per_pixel}u;",
+    f"#define {m_name}_HEIGHT     {h}u",
+    f"#define {m_name}_WIDTH      {w}u",
+    f"#define {m_name}_NUM_PIXELS {w*h}u",
+    f"#define {m_name}_SIZE_BYTES {w*h*bytes_per_pixel}u",
     "",
-    f"uint8_t {name.lower()}_pixels[{w}][{h}]{parr} = {{",
+    f"const uint8_t {v_name}_pixels[{w}][{h}]{parr} = {{",
     get_pixel_string(image),
     "};",
     "",
-    f"#endif /* _{name.upper()}_H_ */"
+    f"#endif /* _{m_name}_H_ */"
     ])
 
     return header_string
