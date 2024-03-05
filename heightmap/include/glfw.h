@@ -7,14 +7,8 @@
 
 GLFWwindow* window = NULL;
 
-static void error_callback( int error, const char *msg ) {
+void error_callback( int error, const char *msg ) {
     printf("[%d] %s\n", error, msg);
-}
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
 int glfw_init(void) {
@@ -37,9 +31,6 @@ int glfw_init(void) {
         return -1;
     }
 
-    /* set key callback */
-    glfwSetKeyCallback(window, key_callback);
-
     /* make the window's context current */
     glfwMakeContextCurrent(window);
 
@@ -47,6 +38,23 @@ int glfw_init(void) {
     glfwSwapInterval(1);
 
     return 0;
+}
+
+void glfw_set_key_callback(GLFWkeyfun callback) {
+    glfwSetKeyCallback(window, callback);
+}
+
+void glfw_set_mouse_button_callback(GLFWmousebuttonfun callback) {
+    glfwSetMouseButtonCallback(window, callback);
+}
+
+void glfw_set_scroll_callback(GLFWscrollfun callback) {
+    glfwSetScrollCallback(window, callback);
+}
+
+void glfw_set_cursor_pos_callback(GLFWcursorposfun callback) {
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetCursorPosCallback(window, callback);
 }
 
 int glfw_should_close(void) {
