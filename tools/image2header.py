@@ -1,13 +1,14 @@
 #! /usr/bin/python3
 
 import argparse
+import math
 import sys
 import os
 from PIL import Image
 
 def get_pixel_string(image: Image) -> str:
     pixels = image.load()
-    mode = image.load()
+    mode = image.mode
     (w,h) = image.size
 
     pixel_str = ""
@@ -17,10 +18,20 @@ def get_pixel_string(image: Image) -> str:
             pixel = pixels[i,j]
             if mode == "RGBA":
                 (r, g, b, a) = pixel
-                pixel_str += f"{{{r}u, {g}u, {b}u, {a}u}}"
+                # pixel_str += f"{{{r}u, {g}u, {b}u, {a}u}}"
+                if r == g and g == b:
+                    lum = r
+                else:
+                    lum = round(math.sqrt((r/255)**2 + (g/255)**2 + (b/255)**2)*255)
+                pixel_str += f"{lum}u"
             elif mode == "RGB":
                 (r, g, b) = pixel
-                pixel_str += f"{{{r}u, {g}u, {b}u}}"
+                # pixel_str += f"{{{r}u, {g}u, {b}u}}"
+                if r == g and g == b:
+                    lum = r
+                else:
+                    lum = round(math.sqrt((r/255)**2 + (g/255)**2 + (b/255)**2)*255)
+                pixel_str += f"{lum}u"
             else:
                 pixel_str += f"{pixel}u"
             
@@ -42,12 +53,12 @@ def get_header_string(name: str, image: Image) -> str:
 
     parr = ""
     bytes_per_pixel = 1
-    if image.mode == "RGBA":
-        parr = "[4]"
-        bytes_per_pixel = 4
-    elif image.mode == "RGB":
-        parr = "[3]"
-        bytes_per_pixel = 3
+    # if image.mode == "RGBA":
+    #     parr = "[4]"
+    #     bytes_per_pixel = 4
+    # elif image.mode == "RGB":
+    #     parr = "[3]"
+    #     bytes_per_pixel = 3
 
     header_string  = "\n".join([
     f"#ifndef _{m_name}_H_",
@@ -60,7 +71,7 @@ def get_header_string(name: str, image: Image) -> str:
     f"#define {m_name}_NUM_PIXELS {w*h}u",
     f"#define {m_name}_SIZE_BYTES {w*h*bytes_per_pixel}u",
     "",
-    f"const uint8_t {v_name}_pixels[{w}][{h}]{parr} = {{",
+    f"const uint8_t {v_name}_pixels[{h}][{w}]{parr} = {{",
     get_pixel_string(image),
     "};",
     "",
