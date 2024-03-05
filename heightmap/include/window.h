@@ -51,9 +51,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         firstmouse = true; /* flag to reset cursor position state */
-        /* points camera to snap position */
-        // glm_vec3_sub(CAMERA_SNAP_POS, camera_pos, camera_forward);
-        // glm_vec3_normalize(camera_forward);
+        /* points camera to snap direction */
         glm_vec3_copy(CAMERA_SNAP_DIR, camera_forward);
         /* sets heading and pitch */
         pitch = asinf(camera_forward[2]);
