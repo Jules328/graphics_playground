@@ -20,10 +20,11 @@ int width, height;
 double start_time, current_time, delta_time;
 uint32_t frames = 0;
 /* camera variables */
-// vec3 camera_pos = {0.f, 0.f, 3.f};
-vec3 camera_pos = {0.f, 3.f, 0.f};
+#define CAMERA_START_POS {0.f, 0.f, 3.f}
+#define CAMERA_START_DIR {0.f, 1.f, 0.f}
+vec3 camera_pos = CAMERA_START_POS;
+vec3 camera_forward = CAMERA_START_DIR;
 vec3 camera_target;
-vec3 camera_forward = {0.f, 0.f, -1.f};
 vec3 camera_right;
 vec3 camera_up;
 /* view matrices */
@@ -31,8 +32,9 @@ float fov = 60.f;
 mat4 view;
 mat4 proj;
 /* mouse information */
+bool camera_controled = false;
 bool firstmouse = true;
-float yaw, pitch;
+float heading = 0.f, pitch = 0.f;
 double lastx, lasty;
 
 void error_callback( int error, const char *msg ) {
@@ -45,13 +47,26 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-#define CAMERA_SNAP_POS GLM_VEC3_ZERO
+#define CAMERA_SNAP_DIR (vec3)CAMERA_START_DIR
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         firstmouse = true; /* flag to reset cursor position state */
         /* points camera to snap position */
-        glm_vec3_sub(CAMERA_SNAP_POS, camera_pos, camera_forward);
-        glm_vec3_normalize(camera_forward);
+        // glm_vec3_sub(CAMERA_SNAP_POS, camera_pos, camera_forward);
+        // glm_vec3_normalize(camera_forward);
+        glm_vec3_copy(CAMERA_SNAP_DIR, camera_forward);
+        /* sets heading and pitch */
+        pitch = asinf(camera_forward[2]);
+        heading = asinf(camera_forward[0] / cosf(pitch));
+    }
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
+            camera_controled = true;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+        } else if (action == GLFW_RELEASE) {
+            camera_controled = false;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 }
 
@@ -64,9 +79,14 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
+    printf("Time %0.3f: Cursor position: %f %f\n", glfwGetTime(), xpos, ypos);
+    if (!camera_controled) {
+        firstmouse = true;
+        return;
+    }
+
     if (firstmouse) {
-        pitch = asinf(camera_forward[1]);
-        yaw = asinf(camera_forward[0] / cosf(pitch));
+        /* backs out pitch and heading from starting direction */
         lastx = xpos; lasty = ypos;
         firstmouse = false;
     }
@@ -80,8 +100,8 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
-    yaw   += xoffset * M_PI / 180.f;
-    pitch -= yoffset * M_PI / 180.f;
+    heading += xoffset * M_PI / 180.f;
+    pitch   -= yoffset * M_PI / 180.f;
 
     const float one_deg = M_PI / 180.f;
     const float limit = M_PI / 4 - one_deg; /* 89 deg in rad */
@@ -91,9 +111,9 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
         pitch = -limit;
 
     vec3 dir;
-    dir[0] = sinf(yaw) * cosf(pitch);
-    dir[1] = sinf(pitch);
-    dir[2] = -cosf(yaw) * cosf(pitch);
+    dir[0] = sinf(heading) * cosf(pitch);
+    dir[1] = cosf(heading) * cosf(pitch);
+    dir[2] = sinf(pitch);
     glm_vec3_normalize_to(dir, camera_forward);
 }
 
@@ -190,7 +210,7 @@ void window_update(void) {
     glViewport(0, 0, width, height);
 
     /* Camera updates */        
-    glm_vec3_cross(camera_forward, GLM_YUP, camera_right);
+    glm_vec3_cross(camera_forward, GLM_ZUP, camera_right);
     glm_vec3_normalize(camera_right);
 
     glm_vec3_cross(camera_right, camera_forward, camera_up);

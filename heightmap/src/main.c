@@ -56,15 +56,10 @@ void gen_vertices(uint32_t height, uint32_t width, float spacing, float scale) {
 
     for (h = 0; h < height; ++h) {
         for (w = 0; w < width; ++w) {
-            /* xy plane heightmap */
-            // vertices[h][w][0] = spacing * w - w_offset; /* -x in top left */
-            // vertices[h][w][1] = h_offset - spacing * h; /* +y in top left */
-            // vertices[h][w][2] = heightmap_pixels[h][w] * scale;
-
-            /* xz plane heightmap - y is altitude, -z is "north", +x is "east"*/
-            vertices[h][w][0] = spacing * w - w_offset; /* -x in far left */
-            vertices[h][w][2] = spacing * h - h_offset; /* -z in far left */
-            vertices[h][w][1] = heightmap_pixels[h][w] * scale;
+            /* xy plane heightmap - z is altitude, +x is "east", +y is "north" */
+            vertices[h][w][0] = spacing * w - w_offset; /* -x in top left */
+            vertices[h][w][1] = h_offset - spacing * h; /* +y in top left */
+            vertices[h][w][2] = heightmap_pixels[h][w] * scale;
 
             colors[h][w][0] = heightmap_pixels[h][w];
             colors[h][w][1] = heightmap_pixels[h][w];
