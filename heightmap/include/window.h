@@ -1,12 +1,13 @@
-#ifndef _GL_GLFW_H_
-#define _GL_GLFW_H_
+#ifndef _WINDOW_H_
+#define _WINDOW_H_
 
 #include <math.h>
 #include <stdio.h>
 
-#include <GL/gl.h>
 #include <cglm/cglm.h>
 #include <GLFW/glfw3.h>
+
+#include "glversion.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -15,6 +16,7 @@
 GLFWwindow* window = NULL;
 
 /* window properties*/
+char title[32] = "";
 int width, height;
 /* timing metrics */
 double start_time, current_time, delta_time;
@@ -77,7 +79,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 }
 
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
-    printf("Time %0.3f: Cursor position: %f %f\n", glfwGetTime(), xpos, ypos);
+    /* returns early if camera shouldn't move */
     if (!camera_controled) {
         firstmouse = true;
         return;
@@ -160,12 +162,14 @@ int window_init(void) {
         return -1;
     
     /* glfw window hints for opengl (1.3) profile */
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CLIENT_API, GL_CLIENT_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_CONTEXT_VERSION_MAJOR);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_CONTEXT_VERSION_MINOR);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "OpenGL 1.3 Height Map", NULL, NULL);
+    sprintf(title, "OpenGL %d.%d Heightmap Demo", GL_CONTEXT_VERSION_MAJOR, GL_CONTEXT_VERSION_MINOR);
+    window = glfwCreateWindow(640, 480, title, NULL, NULL);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -258,4 +262,4 @@ void _get_window_size(int* width, int* height) {
     glfwGetFramebufferSize(window, width, height);
 }
 
-#endif /* _GL_GLFW_H_ */
+#endif /* _WINDOW_H_ */

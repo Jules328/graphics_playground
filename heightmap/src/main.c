@@ -3,6 +3,19 @@
 #include "heightmap.h"
 #include "window.h"
 
+/*         TODO list
+ * -------------------------
+ * - add terrain coloring and lighting (normal vectors, altitude map 16x16 texture?)
+ * - draw further away locations at lower resolution
+ * - draw only chunks of terrain
+ * - choose what gets drawn (indices) based off of current location of camera 
+ * - only draw triangles that will be seen (based on camera position and direction)
+ * - allow for use of multiple heightmaps
+ * - add opengl2 implementation (selectable with compile flags?)
+ * - speed comparisons of opengl 1 version drawing everything (drawArrays), drawing specific indices (drawElements), and opengl 2 version
+ * - make presentation - outline design of modern system and illustrate what is lost with OpenGL versions
+ */
+
 /* pre allocates memory */
 typedef uint8_t uvec3[3];
 vec3 vertices[HEIGHTMAP_HEIGHT][HEIGHTMAP_WIDTH];
