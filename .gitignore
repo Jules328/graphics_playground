@@ -1,4 +1,5 @@
 .vscode
 graphics_venv
 *.exe
+*.d
 obj

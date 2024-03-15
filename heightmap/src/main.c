@@ -11,7 +11,7 @@
  * - choose what gets drawn (indices) based off of current location of camera 
  * - only draw triangles that will be seen (based on camera position and direction)
  * - allow for use of multiple heightmaps
- * - add opengl2 implementation (selectable with compile flags?)
+ * - add opengl2 implementation
  * - speed comparisons of opengl 1 version drawing everything (drawArrays), drawing specific indices (drawElements), and opengl 2 version
  * - make presentation - outline design of modern system and illustrate what is lost with OpenGL versions
  */
@@ -21,8 +21,8 @@ typedef uint8_t uvec3[3];
 vec3 vertices[HEIGHTMAP_HEIGHT][HEIGHTMAP_WIDTH];
 uvec3 colors[HEIGHTMAP_HEIGHT][HEIGHTMAP_WIDTH];
 
-#define INDICES (HEIGHTMAP_NUM_PIXELS + (HEIGHTMAP_HEIGHT-2) * (HEIGHTMAP_WIDTH-1))
-uint32_t indices[INDICES];
+#define NUM_INDICES (HEIGHTMAP_NUM_PIXELS + (HEIGHTMAP_HEIGHT-2) * (HEIGHTMAP_WIDTH-1))
+uint32_t indices[NUM_INDICES];
 
 void gen_indices(uint32_t height, uint32_t width) {
     uint32_t i, h = 0, w = 0, points;
@@ -69,14 +69,16 @@ void gen_vertices(uint32_t height, uint32_t width, float spacing, float scale) {
 
     for (h = 0; h < height; ++h) {
         for (w = 0; w < width; ++w) {
+            uint8_t alt = heightmap_pixels[h][w];
+
             /* xy plane heightmap - z is altitude, +x is "east", +y is "north" */
             vertices[h][w][0] = spacing * w - w_offset; /* -x in top left */
             vertices[h][w][1] = h_offset - spacing * h; /* +y in top left */
-            vertices[h][w][2] = heightmap_pixels[h][w] * scale;
+            vertices[h][w][2] = alt * scale;
 
-            colors[h][w][0] = heightmap_pixels[h][w];
-            colors[h][w][1] = heightmap_pixels[h][w];
-            colors[h][w][2] = heightmap_pixels[h][w];
+            colors[h][w][0] = alt;
+            colors[h][w][1] = alt;
+            colors[h][w][2] = alt;
         }
     }
 }

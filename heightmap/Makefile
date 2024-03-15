@@ -1,15 +1,18 @@
 MAKE     := /usr/bin/make
 CC       := /usr/bin/gcc
 
-CPPFLAGS := -Iinclude
-CFLAGS   := -Wall -g -O0 -D_GL_VERSION_=1
+CPPFLAGS := -Iinclude -MMD -MP
+CFLAGS   := -Wall -g -O0
 LDLIBS   := -lGL -lglfw3 -lm -lcglm
 
 .PHONY: all clean
-all: main.exe
+all: gl1.exe gl2.exe
 
-main.exe: src/main.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) $< -o $@ $(LDLIBS)
+gl1.exe: src/main.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -D_GL_VERSION_=1 $< -o $@ $(LDLIBS)
+
+gl2.exe: src/main.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -D_GL_VERSION_=2 $< -o $@ $(LDLIBS)
 
 clean:
-	rm -rf main.exe
+	rm -rf *.exe *.d
