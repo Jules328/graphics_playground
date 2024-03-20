@@ -3,3 +3,5 @@ graphics_venv
 *.exe
 *.d
 obj
+gl1
+gl2

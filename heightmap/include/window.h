@@ -187,11 +187,7 @@ int window_init(void) {
     /* cap framerate at screen refresh */
     glfwSwapInterval(1);
 
-    /* set clear color and enable depth testing */
-    glClearColor(0.5, 0.5, 0.5, 1.0);
-    glEnable(GL_DEPTH_TEST);
-
-    return 0;
+    return gl_init();
 }
 
 void window_start(void) {
@@ -204,48 +200,32 @@ void window_update(void) {
     /* poll for inputs */
     glfwPollEvents();
 
-    /* clear frame */
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    /* resize openGL viewport to window's size */
+    /* get window's size */
     glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
 
-    /* Camera updates */        
+    /* update camera properties from user mouse input */        
     glm_vec3_cross(camera_forward, GLM_ZUP, camera_right);
     glm_vec3_normalize(camera_right);
 
     glm_vec3_cross(camera_right, camera_forward, camera_up);
     glm_vec3_normalize(camera_up);
 
-    /* update camera position and view matrix */
+    /* process camera position user key input */
     process_input();
+
+    /* update view matrix */
     glm_vec3_add(camera_pos, camera_forward, camera_target);
     glm_lookat(camera_pos, camera_target, camera_up, view);
 
     /* update projection matrix */
     glm_perspective(fov * M_PI / 180.f, width / (float) height, 0.1f, 100.f, proj);
-#ifdef USE_GL1
-    /* Update projection matrix to fit window */
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(&proj[0][0]);
 
-    /* Update model matrix to rotate */
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(&view[0][0]);
-#endif
-#ifdef USE_GL2
-    mat4 mvp;
-    glm_mat4_mul(proj, view, mvp);
-    glUniformMatrix4fv(0 /* guess, should be linked to u_mvp location */, 1, false, &mvp[0][0]);
-#endif
+    /* update opengl */
+    gl_window_update(width, height, view, proj);
 }
 
 int window_draw_frame(void) {
-    /* check GL errors */
-    uint32_t error = glGetError();
-    if (error != 0) {
-        printf("OpenGL errorcode 0x%04x\n", error);
+    if (gl_draw_frame() != 0) {
         return -1;
     }
     

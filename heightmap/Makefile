@@ -5,14 +5,16 @@ CPPFLAGS := -Iinclude -MMD -MP
 CFLAGS   := -Wall -g -O0
 LDLIBS   := -lGL -lglfw3 -lm -lcglm
 
-.PHONY: all clean
-all: gl1.exe gl2.exe
+EXE := gl1 gl2
 
-gl1.exe: src/main.c
+.PHONY: all clean
+all: $(EXE)
+
+gl1: src/main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -D_GL_VERSION_=1 $< -o $@ $(LDLIBS)
 
-gl2.exe: src/main.c
+gl2: src/main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -D_GL_VERSION_=2 $< -o $@ $(LDLIBS)
 
 clean:
-	rm -rf *.exe *.d
+	rm -rf $(EXE) *.d
