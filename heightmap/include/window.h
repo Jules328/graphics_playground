@@ -223,14 +223,22 @@ void window_update(void) {
     glm_vec3_add(camera_pos, camera_forward, camera_target);
     glm_lookat(camera_pos, camera_target, camera_up, view);
 
+    /* update projection matrix */
+    glm_perspective(fov * M_PI / 180.f, width / (float) height, 0.1f, 100.f, proj);
+#ifdef USE_GL1
     /* Update projection matrix to fit window */
     glMatrixMode(GL_PROJECTION);
-    glm_perspective(fov * M_PI / 180.f, width / (float) height, 0.1f, 100.f, proj);
     glLoadMatrixf(&proj[0][0]);
 
     /* Update model matrix to rotate */
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(&view[0][0]);
+#endif
+#ifdef USE_GL2
+    mat4 mvp;
+    glm_mat4_mul(proj, view, mvp);
+    glUniformMatrix4fv(0 /* guess, should be linked to u_mvp location */, 1, false, &mvp[0][0]);
+#endif
 }
 
 int window_draw_frame(void) {

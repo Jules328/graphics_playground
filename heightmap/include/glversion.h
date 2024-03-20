@@ -3,10 +3,11 @@
 
 #include <GLFW/glfw3.h>
 
-#if _GL_VERSION_ == 2
-#define USE_GL2
-#else
+/* defaults to OpenGL 2 */
+#if _GL_VERSION_ == 1
 #define USE_GL1
+#else
+#define USE_GL2
 #endif
 
 #ifdef USE_GL1
