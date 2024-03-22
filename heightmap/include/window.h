@@ -104,7 +104,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     pitch   -= yoffset * M_PI / 180.f;
 
     const float one_deg = M_PI / 180.f;
-    const float limit = M_PI / 4 - one_deg; /* 89 deg in rad */
+    const float limit = M_PI / 2 - one_deg; /* 89 deg in rad */
     if(pitch > limit)
         pitch = limit;
     if(pitch < -limit)

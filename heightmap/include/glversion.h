@@ -29,15 +29,24 @@
 int success;
 char infoLog[512];
 GLuint fragShader, vertShader, shaderProgram;
-GLint u_mvp, a_pos, a_col;
+GLint u_mvp, a_pos, a_tex;
 const char* vert_shader =
+"uniform sampler2D heightmap;\n"
+"uniform float alt_scale;\n"
 "uniform mat4 u_mvp;\n"
-"attribute vec3 a_pos;\n"
-"attribute vec3 a_col;\n"
+"\n"
+"attribute vec2 a_pos;\n"
+"attribute vec2 a_tex;\n"
+"\n"
 "varying vec3 v_col;\n"
+// "varying vec2 v_tex;\n"
 "void main() {\n"
-"   v_col = a_col;\n"
-"   gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
+// "   v_tex = a_tex;\n"
+"   float height = texture2D(heightmap, a_tex).r;\n"
+"   v_col = vec3(height);\n"
+// "   v_col = vec3(a_tex, 0.0);\n"
+// "   v_col = texture2D(heightmap, a_tex).rgb;\n"
+"   gl_Position = u_mvp * vec4(a_pos, alt_scale * height , 1.0);\n"
 "}\0";
 // "uniform mat4 mvp_matrix; // model-view-projection matrix"
 // "uniform mat3 normal_matrix; // normal matrix"
@@ -58,9 +67,12 @@ const char* vert_shader =
 
 const char* frag_shader =
 "precision mediump float;\n"
+// "uniform sampler2D heightmap;\n"
 "varying vec3 v_col;\n"
+// "varying vec2 v_tex;\n"
 "void main() {\n"
-"    gl_FragColor = vec4(v_col, 1.0f);\n"
+// "   gl_FragColor = texture2D(heightmap, v_tex);\n"
+"   gl_FragColor = vec4(v_col, 1.0f);\n"
 "}\0";
 // "precision mediump float;"
 // "uniform sampler2D t_reflectance;"
@@ -77,12 +89,12 @@ int gl_init(void) {
     /* set clear color and enable depth testing */
     glClearColor(0.5, 0.5, 0.5, 1.0);
     glEnable(GL_DEPTH_TEST);
+    // glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); /* wireframe */
 
 #ifdef USE_GL1
     /* Setup vertex and color arrays */
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-    // glPolygonMode( GL_FRONT_AND_BACK, GL_LINE ); /* wireframe */
 #endif
 #ifdef USE_GL2
     /* compile vertex and fragment shaders - not SC */
@@ -131,14 +143,14 @@ int gl_init(void) {
     /* Grab locations of uniforms and attributes */
     u_mvp = glGetUniformLocation(shaderProgram, "u_mvp");
     a_pos = glGetAttribLocation(shaderProgram, "a_pos");
-    a_col = glGetAttribLocation(shaderProgram, "a_col");
-    printf("u_mvp: %d, a_pos: %d, a_col: %d\n", u_mvp, a_pos, a_col);
+    a_tex = glGetAttribLocation(shaderProgram, "a_tex");
+    printf("u_mvp: %d, a_pos: %d, a_tex: %d\n", u_mvp, a_pos, a_tex);
     /* TODO - add check for if any uniforms or attributes are -1 */
 
     /* TODO - replace with buffer object */
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glEnableVertexAttribArray(a_pos);
-    glEnableVertexAttribArray(a_col);
+    glEnableVertexAttribArray(a_tex);
 #endif
 
     return 0;

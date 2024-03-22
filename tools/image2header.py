@@ -22,7 +22,7 @@ def get_pixel_string(image: Image) -> str:
                 if r == g and g == b:
                     lum = r
                 else:
-                    lum = round(math.sqrt((r/255)**2 + (g/255)**2 + (b/255)**2)*255)
+                    lum = round((r + g + b) / 3)
                 pixel_str += f"{lum}u"
             elif mode == "RGB":
                 (r, g, b) = pixel
@@ -30,7 +30,7 @@ def get_pixel_string(image: Image) -> str:
                 if r == g and g == b:
                     lum = r
                 else:
-                    lum = round(math.sqrt((r/255)**2 + (g/255)**2 + (b/255)**2)*255)
+                    lum = round((r + g + b) / 3)
                 pixel_str += f"{lum}u"
             else:
                 pixel_str += f"{pixel}u"
